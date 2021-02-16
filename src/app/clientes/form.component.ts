@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Cliente } from './cliente';
+import { ClienteService } from './cliente.service';
+import { Router, ActivatedRoute } from '@angular/router'
 
 @Component({
   selector: 'app-form',
@@ -7,17 +9,30 @@ import { Cliente } from './cliente';
 })
 export class FormComponent implements OnInit {
 
-  private titulo: string = "Crear Cliente";
-  private cliente: Cliente = new Cliente();
+  titulo: string = "Crear Cliente";
+  cliente: Cliente = new Cliente(); //! error TS2341 con private
 
-  constructor() { }
+  constructor(private clienteService: ClienteService, private router: Router, private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
+    this.cargarCliente();
+  }
+
+  cargarCliente(): void {
+    this.activatedRoute.params.subscribe(params => {
+      let id = params['id'];
+      if (id) {
+        this.clienteService.getCliente(id).subscribe(
+          (cliente) => this.cliente = cliente
+        )
+      }
+    })
   }
 
   public create(): void {
-    console.log("Clicked!");
-    console.log(this.cliente);
+    this.clienteService.create(this.cliente).subscribe(
+      response => this.router.navigate(['/clientes'])
+    );
   }
 
 }
